@@ -1,4 +1,5 @@
 var system = require('system'),
+    reader = require('./reader'),
     port,
     server;
 
@@ -10,10 +11,11 @@ if (system.args.length !== 2) {
 port = system.args[1];
 server = require('webserver').create();
 service = server.listen(port, function(req, resp) {
-  console.log('Got request at: ' + new Date());
+  var t = Date.now()
+  console.log('Got request at: ' + new Date(t));
   var query = queryString(req.url);
 
-  readArticle(query.url, function(err, article) {
+  reader.readArticle(query.url, function(err, article) {
     if (err) {
       resp.statusCode = 400;
       resp.headers = {
@@ -21,6 +23,7 @@ service = server.listen(port, function(req, resp) {
         'Content-Type': 'application/json'
       };
       resp.write(JSON.stringify({message: err}));
+      console.log('Respond 400 - took ' + (Date.now() - t) + ' msec')
       return resp.close();
     }
 
@@ -30,6 +33,7 @@ service = server.listen(port, function(req, resp) {
       'Content-Type': 'application/json'
     };
     resp.write(JSON.stringify(article));
+    console.log('Respond 200 - took ' + (Date.now() - t) + ' msec')
     return resp.close();
   });
 });
@@ -38,7 +42,7 @@ if (!service) {
   console.log('Cannot listen on port ' + port);
   phantom.exit();
 }
-console.log('Listening on port ' + port);
+console.log('Listening on port ' + port + ' ...');
 
 
 function queryString(url) {
@@ -50,42 +54,7 @@ function queryString(url) {
     var e = part.indexOf("=")
     var key = part.substr(0, e);
     var value = part.substr(e+1);
-    console.log(value);
     result[key] = decodeURIComponent(decodeURIComponent(value));
-    console.log(result[key]);
   });
   return result;
-}
-
-function readArticle(url, callback) {
-  var page = require('webpage').create();
-  page.settings.loadImages = false;
-
-  console.log('Opening ' + url);
-  page.open(url, function(status) {
-    console.log('status ' + status);
-    if (status !== 'success') {
-      return callback('Got status: ' + status);
-    }
-
-    if (!page.injectJs('Readability.js')) {
-      console.log('Failed injecting script');
-      return callback("Failed inject Readability.js");
-    }
-
-    console.log('Parsing article');
-    var article = page.evaluate(function() {
-      var loc = document.location;
-      var uri = {
-        spec: loc.href,
-        host: loc.host,
-        prePath: loc.protocol + "//" + loc.host,
-        scheme: loc.protocol.substr(0, loc.protocol.indexOf(":")),
-        pathBase: loc.protocol + "//" + loc.host + loc.pathname.substr(0, loc.pathname.lastIndexOf("/") + 1)
-      };
-      var article = new Readability(uri, document).parse();
-      return article;
-    });
-    return callback(null, article);
-  });
 }

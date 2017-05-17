@@ -9,11 +9,11 @@ $ phantomjs server.js 8080
 
 Test using [HTTPie](https://httpie.org/)
 ```shell
-$ http localhost:8080 url==https://www.techinasia.com/talk/dbs-ceo-banks-digital-reinvention
+$ http localhost:8080 url==https://www.techinasia.com/talk/7-learned-running-hk-accelerator
 ```
 
 or curl
 
 ```shell
-$ curl http://localhost:8080?url=https://www.techinasia.com/talk/dbs-ceo-banks-digital-reinvention
+$ curl http://localhost:8080?url=https://www.techinasia.com/talk/7-learned-running-hk-accelerator
 ```
