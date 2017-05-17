@@ -1,6 +1,6 @@
 # Phantom WebReader
 
-This is attemp to create simple server using [PhantomJS](http://phantomjs.org/) and serve the web reading using [Readability](https://github.com/mozilla/readability).
+This is attempt to create simple server using [PhantomJS](http://phantomjs.org/) and serve the web reading using [Readability](https://github.com/mozilla/readability).
 
 Run the server
 ```shell
