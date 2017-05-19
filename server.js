@@ -11,7 +11,7 @@ if (system.args.length !== 2) {
 port = system.args[1];
 server = require('webserver').create();
 service = server.listen(port, function(req, resp) {
-  var t = Date.now()
+  var t = Date.now();
   console.log('Got request at: ' + new Date(t));
   var query = queryString(req.url);
 
