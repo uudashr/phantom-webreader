@@ -22,7 +22,12 @@ function readArticle(url, callback) {
         // assume h1 should be loaded
         return document.querySelector('h1') !== undefined;
       })
-    }, function loaded() {
+    }, function loaded(err) {
+      page.stop();
+      if (err) {
+        return callback(err);
+      }
+
       console.log('Parsing article');
       var article = page.evaluate(function() {
         var loc = document.location;

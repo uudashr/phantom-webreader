@@ -1,3 +1,4 @@
+// Based on: https://github.com/ariya/phantomjs/blob/master/examples/waitfor.js
 /**
  * Wait until the test condition is true or a timeout occurs. Useful for waiting
  * on a server response or for a ui change (fadeIn, etc.) to occur.
@@ -13,7 +14,7 @@
 
 "use strict";
 
-function waitFor(testFx, onReady, timeOutMillis) {
+function waitFor(testFx, callback, timeOutMillis) {
   var maxtimeOutMillis = timeOutMillis ? timeOutMillis : 3000, //< Default Max Timout is 3s
     start = new Date().getTime(),
     condition = false,
@@ -25,11 +26,12 @@ function waitFor(testFx, onReady, timeOutMillis) {
         if (!condition) {
           // If condition still not fulfilled (timeout but condition is 'false')
           console.log("'waitFor()' timeout");
-          phantom.exit(1);
+          callback('timeout');
+          clearInterval(interval);
         } else {
           // Condition fulfilled (timeout and/or condition is 'true')
           console.log("'waitFor()' finished in " + (new Date().getTime() - start) + "ms.");
-          typeof(onReady) === "string" ? eval(onReady): onReady(); //< Do what it's supposed to do once the condition is fulfilled
+          typeof(callback) === "string" ? eval(callback): callback(null); //< Do what it's supposed to do once the condition is fulfilled
           clearInterval(interval); //< Stop this interval
         }
       }
