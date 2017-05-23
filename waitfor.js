@@ -1,41 +1,27 @@
 // Based on: https://github.com/ariya/phantomjs/blob/master/examples/waitfor.js
-/**
- * Wait until the test condition is true or a timeout occurs. Useful for waiting
- * on a server response or for a ui change (fadeIn, etc.) to occur.
- *
- * @param testFx javascript condition that evaluates to a boolean,
- * it can be passed in as a string (e.g.: "1 == 1" or "$('#bar').is(':visible')" or
- * as a callback function.
- * @param onReady what to do when testFx condition is fulfilled,
- * it can be passed in as a string (e.g.: "1 == 1" or "$('#bar').is(':visible')" or
- * as a callback function.
- * @param timeOutMillis the max amount of time to wait. If not specified, 3 sec is used.
- */
+'use strict';
 
-"use strict";
+function waitFor(testFn, callback, timeOutMillis) {
+  var maxTimeoutMillis = timeOutMillis ? timeOutMillis : 3000
+  var start = Date.now();
+  if (testFn()) {
+    return callback(null);
+  }
 
-function waitFor(testFx, callback, timeOutMillis) {
-  var maxtimeOutMillis = timeOutMillis ? timeOutMillis : 3000, //< Default Max Timout is 3s
-    start = new Date().getTime(),
-    condition = false,
-    interval = setInterval(function() {
-      if ((new Date().getTime() - start < maxtimeOutMillis) && !condition) {
-        // If not time-out yet and condition not yet fulfilled
-        condition = (typeof(testFx) === "string" ? eval(testFx) : testFx()); //< defensive code
-      } else {
-        if (!condition) {
-          // If condition still not fulfilled (timeout but condition is 'false')
-          console.log("'waitFor()' timeout");
-          callback('timeout');
-          clearInterval(interval);
-        } else {
-          // Condition fulfilled (timeout and/or condition is 'true')
-          console.log("'waitFor()' finished in " + (new Date().getTime() - start) + "ms.");
-          typeof(callback) === "string" ? eval(callback): callback(null); //< Do what it's supposed to do once the condition is fulfilled
-          clearInterval(interval); //< Stop this interval
-        }
-      }
-    }, 250); //< repeat check every 250ms
-};
+  var remaining = Date.now() - start;
+  var i = setInterval(function check() {
+    if ((Date.now() - start) > maxTimeoutMillis) {
+      callback('timeout');
+      clearInterval(i);
+      return;
+    }
+
+    if (testFn()) {
+      callback(null);
+      clearInterval(i);
+      return;
+    }
+  }, Math.min(remaining, 250));
+}
 
 module.exports = waitFor;
